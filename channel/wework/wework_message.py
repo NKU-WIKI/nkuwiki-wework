@@ -26,10 +26,10 @@ def get_with_retry(get_func, max_retries=5, delay=5):
 def get_room_info(wework, conversation_id):
     logger.debug(f"传入的 conversation_id: {conversation_id}")
     rooms = wework.get_rooms()
-    if not rooms or 'room_list' not in rooms:
-        logger.error(f"获取群聊信息失败: {rooms}")
-        return None
-    time.sleep(1)
+    # if not rooms or 'room_list' not in rooms:
+    #     logger.error(f"获取群聊信息失败: {rooms}")
+    #     return None
+    # time.sleep(1)
     logger.debug(f"获取到的群聊信息: {rooms}")
     for room in rooms['room_list']:
         if room['conversation_id'] == conversation_id:
@@ -61,7 +61,7 @@ def c2c_download_and_convert(wework, message, file_name):
 
     current_dir = os.getcwd()
     save_path = os.path.join(current_dir, "tmp", file_name)
-    result = wework.c2c_cdn_download(file_id, aes_key, file_size, file_type, save_path)
+    result = wework.c2c_cdn_download(file_id, aes_key, file_size, save_path)
     logger.debug(result)
 
     # 在下载完SILK文件之后，立即将其转换为WAV文件
@@ -104,7 +104,8 @@ class WeworkMessage(ChatMessage):
                 member_list = wework_msg['data']['member_list']
                 self.actual_user_nickname = member_list[0]['name']
                 self.actual_user_id = member_list[0]['user_id']
-                self.content = f"{self.actual_user_nickname}加入了群聊！"
+                self.is_group = True
+                self.content = f"欢迎{self.actual_user_nickname}加入nkuwiki社区!请查收群公告！"
                 directory = os.path.join(os.getcwd(), "tmp")
                 rooms = get_with_retry(wework.get_rooms)
                 if not rooms:
@@ -123,6 +124,7 @@ class WeworkMessage(ChatMessage):
                     with open(os.path.join(directory, 'wework_room_members.json'), 'w', encoding='utf-8') as f:
                         json.dump(result, f, ensure_ascii=False, indent=4)
                     logger.info("有新成员加入，已自动更新群成员列表缓存！")
+                    # wework.send_text(room_wxid, "有新成员加入，已自动更新群成员列表缓存！")
             else:
                 raise NotImplementedError(
                     "Unsupported message type: Type:{} MsgType:{}".format(wework_msg["type"], wework_msg["MsgType"]))

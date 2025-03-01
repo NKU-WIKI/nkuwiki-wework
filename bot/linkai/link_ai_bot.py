@@ -13,9 +13,11 @@ from bridge.reply import Reply, ReplyType
 from common.log import logger
 from config import conf, pconf
 import threading
-from common import memory, utils
+from common import memory
 import base64
 import os
+
+from plugins import utils
 
 class LinkAIBot(Bot):
     # authentication failed

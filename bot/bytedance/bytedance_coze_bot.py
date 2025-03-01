@@ -13,7 +13,7 @@ from bridge.context import ContextType
 from bridge.reply import Reply, ReplyType
 from common.log import logger
 from config import conf
-
+from channel.wework.run import wework
 class ByteDanceCozeBot(Bot):
     def __init__(self):
         super().__init__()
@@ -21,9 +21,10 @@ class ByteDanceCozeBot(Bot):
 
     def reply(self, query, context=None):
         # acquire reply content
+        
         if context.type == ContextType.TEXT:
             logger.info("[COZE] query={}".format(query))
-
+            
             session_id = context["session_id"]
             session = self.sessions.session_query(query, session_id)
             logger.debug("[COZE] session query={}".format(session.messages))
@@ -43,7 +44,7 @@ class ByteDanceCozeBot(Bot):
             response = reply_content["content"]
             relust = remove_markdown(response)
             return Reply(ReplyType.TEXT, relust)
-
+        
         elif context.type == ContextType.IMAGE_CREATE:
             logger.info("[COZE] painting={}".format(query))
             session_id = context["session_id"]
@@ -63,10 +64,12 @@ class ByteDanceCozeBot(Bot):
             )
             self.sessions.session_reply(reply_content["content"], session_id, reply_content["total_tokens"])
             response = reply_content["content"]
-            if "lf-bot-studio-plugin" in response:
-                relust = remove_markdown(response)
-                url = has_url(relust)
-                return Reply(ReplyType.IMAGE_URL, url)
+            # if "lf-bot-studio-plugin" in response:
+            image_url = extract_markdown_image_url(response)
+            url = image_url if image_url else has_url(response)
+            relust = remove_markdown(response)
+            # return Reply(ReplyType.TEXT, relust)
+            return Reply(ReplyType.IMAGE_URL, url)
         else:
             reply = Reply(ReplyType.ERROR, "Bot不支持处理{}类型的消息".format(context.type))
             return reply
@@ -158,6 +161,7 @@ class ByteDanceCozeBot(Bot):
         for message in messages:
             prompt_tokens += len(message["content"])
         return completion_tokens, prompt_tokens + completion_tokens
+
 def remove_markdown(text):
     # 替换Markdown的粗体标记
     text = text.replace("**", "")
@@ -167,13 +171,21 @@ def remove_markdown(text):
     text = re.sub(r'\((https?://[^\s\)]+)\)', r'\1', text)
     text = re.sub(r'\[(https?://[^\s\]]+)\]', r'\1', text)
     return text
+
+def extract_markdown_image_url(content):
+    """提取包含s.coze.cn域名的图片URL（不限Markdown格式）"""
+    # 修改正则表达式，匹配任意位置出现的s.coze.cn链接
+    coze_image_pattern = r'(https://s\.coze\.cn[^\s\)]+)'
+    image_url = re.search(coze_image_pattern, content)
+    return image_url.group(1) if image_url else None
+
 def has_url(content):
-    # 定义URL匹配的正则表达式模式
+    # 原有函数保持不变，优先使用新函数提取图片URL
+    image_url = extract_markdown_image_url(content)
+    if image_url:
+        return image_url
+    
+    # 原有普通URL匹配逻辑
     url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    # 使用正则表达式模式进行匹配，找到第一个URL
     url = re.search(url_pattern, content)
-    # 判断是否存在URL
-    if url:
-        return url.group()
-    else:
-        return False
+    return url.group() if url else False

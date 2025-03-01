@@ -12,6 +12,7 @@ from channel.channel import Channel
 from common.dequeue import Dequeue
 from config import conf, config
 from plugins import *
+from channel.wework.run import wework
 
 try:
     from voice.audio_convert import any_to_wav
@@ -110,6 +111,15 @@ class ChatChannel(Channel):
                 #print(content)  # 输出结果
 
             if context.get("isgroup", False):  # 群聊
+                e_context = PluginManager().emit_event(
+                    EventContext(
+                        Event.ON_HANDLE_CONTEXT,
+                        {"channel": self, "context": context},
+                    )
+                )
+                if(e_context.is_pass()):
+                    return context
+              
                 match_prefix = check_prefix(content, conf().get("group_chat_prefix"))
                 match_suffix = check_suffix(content, conf().get("group_chat_suffix"))
                 match_contain = check_contain(content, conf().get("group_chat_keyword"))
@@ -214,6 +224,7 @@ class ChatChannel(Channel):
             if e_context.is_break():
                 context["generate_breaked_by"] = e_context["breaked_by"]
             if context.type == ContextType.TEXT or context.type == ContextType.IMAGE_CREATE:  # 文字和图片消息
+                wework.send_text(context['receiver'], "【南开小知正在思考中...】")
                 reply = super().build_reply_content(context.content, context)
             elif context.type == ContextType.VOICE:  # 语音消息
                 cmsg = context["msg"]
@@ -272,7 +283,9 @@ class ChatChannel(Channel):
             elif context.type == ContextType.MINIAPP:
                 pass
             elif context.type == ContextType.JOIN_GROUP:
-                pass
+                if(context['msg'].other_user_nickname  in config.get("group_names_of_manage", [])):
+                    context.type = ContextType.TEXT
+                    reply = super().build_reply_content("创意润色欢迎新成员（输出且只输出润色后的内容）" + context.content, context)
             elif context.type == ContextType.EXIT_GROUP:
                 pass
             elif context.type == ContextType.SYSTEM:
@@ -306,46 +319,21 @@ class ChatChannel(Channel):
                     logger.error("[WX]reply type not support: " + str(reply.type))
                     reply.type = ReplyType.ERROR
                     reply.content = "不支持发送的消息类型: " + str(reply.type)
-
-                if reply.type == ReplyType.TEXT:
-                    reply_text = reply.content
-                    if desire_rtype == ReplyType.VOICE and ReplyType.VOICE not in self.NOT_SUPPORT_REPLYTYPE:
-                        reply = super().build_text_to_voice(reply.content)
-                        return self._decorate_reply(context, reply)
-                    if context.get("isgroup", False):
-                        reply_text = "@" + context["msg"].actual_user_nickname + "\n" + reply_text.strip()
-                        reply_text = conf().get("group_chat_reply_prefix", "") + reply_text + conf().get(
-                            "group_chat_reply_suffix", "")
-                    else:
-                        reply_text = conf().get("single_chat_reply_prefix", "") + reply_text + conf().get(
-                            "single_chat_reply_suffix", "")
-                    reply.content = reply_text
-
-                elif reply.type == ReplyType.ERROR or reply.type == ReplyType.INFO:
+                    return None
+                if(reply.type == ReplyType.ERROR or reply.type == ReplyType.INFO):
                     reply.content = "[" + str(reply.type) + "]\n" + reply.content
-                elif reply.type == ReplyType.IMAGE_URL or reply.type == ReplyType.VOICE or reply.type == ReplyType.IMAGE:
-                    pass
-                elif reply.type == ReplyType.VIDEO_URL:
-                    pass
-                elif reply.type == ReplyType.CARD:
-                    pass
-                elif reply.type == ReplyType.InviteRoom:
-                    pass
-                elif reply.type == ReplyType.TEXT_:
-                    pass
-                elif reply.type == ReplyType.FILE:
-                    pass
-                elif reply.type == ReplyType.MINIAPP:
-                    pass
-                elif reply.type == ReplyType.LINK:
-                    pass
-                elif reply.type == ReplyType.CALL_UP:
-                    pass
-                elif reply.type == ReplyType.GIF:
-                    pass
+                reply_text = reply.content
+                if desire_rtype == ReplyType.VOICE and ReplyType.VOICE not in self.NOT_SUPPORT_REPLYTYPE:
+                    reply = super().build_text_to_voice(reply.content)
+                    return self._decorate_reply(context, reply)
+                if context.get("isgroup", False):
+                    reply_text = "@" + context["msg"].actual_user_nickname + "\n" + reply_text.strip()
+                    reply_text = conf().get("group_chat_reply_prefix", "") + reply_text + conf().get(
+                        "group_chat_reply_suffix", "")
                 else:
-                    logger.error("[WX] unknown reply type: {}".format(reply.type))
-                    return
+                    reply_text = conf().get("single_chat_reply_prefix", "") + reply_text + conf().get(
+                        "single_chat_reply_suffix", "")
+                reply.content = reply_text
             if desire_rtype and desire_rtype != reply.type and reply.type not in [ReplyType.ERROR, ReplyType.INFO]:
                 logger.warning(
                     "[WX] desire_rtype: {}, but reply type: {}".format(context.get("desire_rtype"), reply.type))

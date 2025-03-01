@@ -148,6 +148,7 @@ class NtchatChannel(ChatChannel):
 
     def startup(self):
         smart = conf().get("ntchat_smart", True)
+        # wechatnt.open(smart=False, faked_wechat_version="3.9.10.19")
         wechatnt.open(smart=smart)
         wechatnt.wait_login()
         logger.info("等待登录······")

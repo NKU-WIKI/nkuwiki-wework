@@ -7,6 +7,7 @@ os.environ['ntwork_LOG'] = "ERROR"
 import ntwork
 import requests
 import uuid
+import re
 
 from bridge.context import *
 from bridge.reply import *
@@ -179,6 +180,7 @@ class WeworkChannel(ChatChannel):
         contacts = get_with_retry(wework.get_external_contacts)
         rooms = get_with_retry(wework.get_rooms)
         directory = os.path.join(os.getcwd(), "tmp")
+        logger.info(f"rooms:{rooms}")
         if not contacts or not rooms:
             logger.error("获取contacts或rooms失败，程序退出")
             ntwork.exit_()
@@ -253,13 +255,22 @@ class WeworkChannel(ChatChannel):
         receiver = context["receiver"]
         session_id = context["session_id"]
         if reply.type == ReplyType.TEXT or reply.type == ReplyType.TEXT_:
-            match = re.search(r"^@(.*?)\n", reply.content)
-            if match:
-                new_content = re.sub(r"^@(.*?)\n", "\n", reply.content)
-                wxid_list = [session_id]
-                wework.send_room_at_msg(receiver, new_content, wxid_list)
-            else:
-                wework.send_text(receiver, reply.content)
+            image_url = extract_markdown_image_url(str(reply.content))
+            if image_url != None:
+                filename = str(uuid.uuid4())
+                # 调用你的函数，下载图片并保存为本地文件
+                image_path = download_and_compress_image(image_url, filename)
+                wework.send_image(receiver, file_path=image_path)
+                logger.info("[WX] sendImage url={}, receiver={}".format(image_url, receiver))
+            # match = re.search(r"^@(.*?)\n", reply.content)
+            # if match:
+                # new_content = re.sub(r"^@(.*?)\n", "\n", reply.content)
+                # wxid_list = [session_id]
+                # wework.send_text(receiver, reply.content)
+                # wework.send_room_at_msg(receiver, new_content, wxid_list)
+            # else:
+                # wework.send_text(receiver, reply.content)
+            wework.send_text(receiver, reply.content)
             logger.info("[WX] sendMsg={}, receiver={}".format(reply, receiver))
         elif reply.type == ReplyType.ERROR or reply.type == ReplyType.INFO:
             wework.send_text(receiver, reply.content)
@@ -301,3 +312,10 @@ class WeworkChannel(ChatChannel):
         elif reply.type == ReplyType.VOICE:
             wework.send_file(receiver, reply.content)
             logger.info("[WX] sendFile={}, receiver={}".format(reply.content, receiver))
+
+def extract_markdown_image_url(content):
+    """提取包含s.coze.cn域名的图片URL（不限Markdown格式）"""
+    # 修改正则表达式，匹配任意位置出现的s.coze.cn链接
+    coze_image_pattern = r'(https://s\.coze\.cn[^\s\)]+)'
+    image_url = re.search(coze_image_pattern, content)
+    return image_url.group(1) if image_url else None
