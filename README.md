@@ -42,3 +42,25 @@ pip3 install -r requirements.txt
 ```bash
 python3 app.py
 ```
+
+## 3.配置
+
+在config.json中
+
+```json5
+{
+    "host": "localhost",                        //mysql数据库
+    "user": "root",
+    "passwd": "******",
+    "name": "database",
+    "create_time": "'2025-07-07 00:00:00'",    //起始时间，将从此时间开始查询
+    "table": "table",                          //要查询的表
+    "column": {                                //列
+        "0": "0",
+        "1": "1"
+    },
+    "rooms": "room",                           //要发到的群名
+    "sleepInterval": 5,                        //发送间隔
+    "post_num": 2                              //帖子数量，不足时将继续等一个时间间隔
+}
+```

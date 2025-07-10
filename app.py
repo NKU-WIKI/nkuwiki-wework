@@ -1,10 +1,13 @@
 import sys
 import ntwork
 import getConversationId
-import sendMessages
+import getMessages
+import readConfig
 from time import sleep
 
 try:
+    globals().update(readConfig.readConfig())
+
     wework = ntwork.WeWork()
     # 打开pc企业微信, smart: 是否管理已经登录的微信
     wework.open(smart=True)
@@ -12,16 +15,24 @@ try:
     # 等待登录
     wework.wait_login()
 
-    getId = getConversationId.GetConversationId(5, wework)
+    getId = getConversationId.GetConversationId(1, wework)
 
-    create_time = "'2025-07-07 00:00:00'"
+    roomId = getId.getId(rooms)
+
+    messages = []
 
     while True:
-        sendMsg = sendMessages.SendMessages("localhost", "root", "******", "database", create_time, getId.getId("room"), wework)
+        getMsg = getMessages.GetMessages(host, user, passwd, name, create_time, table, column, wework)
 
-        create_time = sendMsg.sendMessage()
+        create_time, messages_tmp = getMsg.getMessage()
+        messages = messages + messages_tmp
 
-        sleep(5)
+        if len(messages) >= post_num:
+            for message in messages:
+                wework.send_text(roomId, message)
+            messages = []
+
+        sleep(sleepInterval)
 except KeyboardInterrupt:
     ntwork.exit_()
     sys.exit()

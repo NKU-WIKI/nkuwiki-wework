@@ -4,17 +4,18 @@ import pymysql
 
 import getConversationId
 
-class SendMessages:
+class GetMessages:
     time = ""
     sleepInterval = 3
     mysql = {"host": "",
              "user": "",
              "password": "",
              "name": "",}
-    conversationId = ""
+    column = []
+    table = ""
     wework = ntwork.WeWork()
 
-    def __init__(self, host, user, password, name, startTime, conversationId, wework):
+    def __init__(self, host, user, password, name, startTime, table, column, wework):
         ##设置时间,初始化为2000-01-01 00:00:00
         self.time = startTime
 
@@ -23,7 +24,8 @@ class SendMessages:
         self.mysql['password'] = password
         self.mysql['name'] = name
 
-        self.conversationId = conversationId
+        self.column = column
+        self.table = table
 
         self.wework = wework
 
@@ -58,7 +60,7 @@ class SendMessages:
 
         return messages
 
-    def sendMessage(self):
+    def getMessage(self):
         # 连接mysql
         isConnected = False
 
@@ -75,20 +77,14 @@ class SendMessages:
 
         cursor = db.cursor()
 
-        resTitle = self.getColumnInfo("wxapp_post", "title", cursor)
-        resUrl = self.getColumnInfo("wxapp_post", "url_link", cursor)
+        resTitle = self.getColumnInfo(self.table, self.column["0"], cursor)
+        resUrl = self.getColumnInfo(self.table, self.column["1"], cursor)
         messages = self.generateMessages(resTitle, resUrl)
 
         #更新时间
-        self.getColumnInfo("wxapp_post", "create_time", cursor)
-
-        # 发送消息
-        for i in messages:
-            self.wework.send_text(conversation_id=self.conversationId, content=i)
-
-        create_time = self.getColumnInfo("wxapp_post", "create_time", cursor)
+        create_time = self.getColumnInfo(self.table, "create_time", cursor)
         # 关闭游标和数据库连接
         cursor.close()
         db.close()
 
-        return create_time
+        return create_time, messages
