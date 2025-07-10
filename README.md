@@ -1,12 +1,12 @@
 # 简介
 
-> 本项目基于[ntwork](https://https://github.com/dev-kang/ntwork)
+> 本项目基于[ntwork](https://github.com/dev-kang/ntwork)
 > 
 > **本项目仅供学习和技术研究，请勿用于非法用途，如有任何人凭此做何非法事情，均于作者无关，特此声明。**
 
 - 项目支持功能如下：
 
-- [x] **WeCom** ：PC端的个微消息通道，依赖 [ntwork项目](https://https://github.com/dev-kang/ntwork) ，最高支持Python310环境版本，限[WeCom4.0.0.6027版本](https://dldir1.qq.com/wework/work_weixin/WeCom_4.0.8.6027.exe)，定时发送消息文本
+- [x] **WeCom** ：PC端的个微消息通道，依赖 [ntwork项目](https://github.com/dev-kang/ntwork) ，最高支持Python310环境版本，限[WeCom4.0.0.6027版本](https://dldir1.qq.com/wework/work_weixin/WeCom_4.0.8.6027.exe)，定时发送消息文本
 
 # 快速开始
 
