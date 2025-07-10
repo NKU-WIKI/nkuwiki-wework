@@ -4,9 +4,8 @@ import pymysql
 
 import getConversationId
 
-
 class SendMessages:
-    time = "'2025-07-07 00:00:00'"
+    time = ""
     sleepInterval = 3
     mysql = {"host": "",
              "user": "",
@@ -87,6 +86,9 @@ class SendMessages:
         for i in messages:
             self.wework.send_text(conversation_id=self.conversationId, content=i)
 
+        create_time = self.getColumnInfo("wxapp_post", "create_time", cursor)
         # 关闭游标和数据库连接
         cursor.close()
         db.close()
+
+        return create_time

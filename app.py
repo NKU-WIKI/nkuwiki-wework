@@ -2,19 +2,26 @@ import sys
 import ntwork
 import getConversationId
 import sendMessages
+from time import sleep
 
-wework = ntwork.WeWork()
-# 打开pc企业微信, smart: 是否管理已经登录的微信
-wework.open(smart=True)
+try:
+    wework = ntwork.WeWork()
+    # 打开pc企业微信, smart: 是否管理已经登录的微信
+    wework.open(smart=True)
 
-# 等待登录
-wework.wait_login()
+    # 等待登录
+    wework.wait_login()
 
-getId = getConversationId.GetConversationId(5, wework)
+    getId = getConversationId.GetConversationId(5, wework)
 
-sendMsg = sendMessages.SendMessages("localhost", "root", "******", "database", "'2025-07-07 00:00:00'", getId.getId("test"), wework)
+    create_time = "'2025-07-07 00:00:00'"
 
-sendMsg.sendMessage()
+    while True:
+        sendMsg = sendMessages.SendMessages("localhost", "root", "******", "database", create_time, getId.getId("room"), wework)
 
-ntwork.exit_()
-sys.exit()
+        create_time = sendMsg.sendMessage()
+
+        sleep(5)
+except KeyboardInterrupt:
+    ntwork.exit_()
+    sys.exit()

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 import sys
 from time import sleep
 
@@ -18,6 +18,11 @@ class GetConversationId:
         # 获取群列表并输出
         sleep(self.getTime)  # 防止获取不到
         rooms = self.wework.get_rooms()
+
+        while not rooms:
+            sleep(self.getTime)  # 防止获取不到
+            rooms = self.wework.get_rooms()
+
         print("群列表: ")
         print(rooms)
 
