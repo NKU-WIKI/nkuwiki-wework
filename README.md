@@ -6,7 +6,7 @@
 
 - 项目支持功能如下：
 
-- [x] **WeCom** ：PC端的个微消息通道，依赖 [ntwork项目](https://github.com/dev-kang/ntwork) ，最高支持Python310环境版本，限[WeCom4.0.0.6027版本](https://dldir1.qq.com/wework/work_weixin/WeCom_4.0.8.6027.exe)，定时发送消息文本
+- [x] **WeCom** ：PC端的个微消息通道，依赖 [ntwork项目](https://github.com/dev-kang/ntwork) ，最高支持Python310环境版本，限[WeCom4.0.0.6027版本](https://dldir1.qq.com/wework/work_weixin/WeCom_4.0.8.6027.exe)，定时从数据库中读取内容发送消息
 
 # 快速开始
 
@@ -31,7 +31,7 @@ cd nkuwiki-wework
 pip3 install -r requirements.txt
 ```
 
-**(3) 安装指定版本的企业微信，并且在app.py中填写mysql的登录信息**
+**(3) 安装指定版本的企业微信
 
 ## 2.运行
 
