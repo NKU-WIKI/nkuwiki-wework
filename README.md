@@ -31,7 +31,7 @@ cd nkuwiki-wework
 pip3 install -r requirements.txt
 ```
 
-**(3) 安装指定版本的企业微信
+**(3) 安装指定版本的企业微信**
 
 ## 2.运行
 
