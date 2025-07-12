@@ -8,7 +8,7 @@ class GetConversationId:
     #设置时间，获取不到加长一点
     getTime = 3
     wework = ntwork.WeWork()
-    conversationId = ""
+    conversationId = []
 
     def __init__(self, getConversationIdTime, wework):
         self.getTime = getConversationIdTime
@@ -30,8 +30,9 @@ class GetConversationId:
 
         #根据群名得到conversationId
         for i in rooms['room_list']:
-            if i['nickname'] == roomName:
-                self.conversationId = i['conversation_id']
+            for j in roomName:
+                if i['nickname'] == j:
+                    self.conversationId.append(i['conversation_id'])
 
         return self.conversationId
 

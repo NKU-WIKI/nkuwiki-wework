@@ -42,8 +42,9 @@ try:
                     else:
                         msgToSend[i//max_send_num] = msgToSend[i//max_send_num] + "\n\n" + message
 
-            for msg in msgToSend:
-                wework.send_text(roomId, msg)
+            for room in roomId:
+                for msg in msgToSend:
+                    wework.send_text(room, msg)
             messages = []
             msgToSend = []
 

@@ -76,8 +76,8 @@ class GetMessages:
 
         cursor = db.cursor()
 
-        resTitle = self.getColumnInfo(self.table, self.column["0"], cursor)
-        resUrl = self.getColumnInfo(self.table, self.column["1"], cursor)
+        resTitle = self.getColumnInfo(self.table, self.column[0], cursor)
+        resUrl = self.getColumnInfo(self.table, self.column[1], cursor)
         messages = self.generateMessages(resTitle, resUrl)
 
         #更新时间
