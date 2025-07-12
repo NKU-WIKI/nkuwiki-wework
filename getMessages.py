@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import ntwork
 import pymysql
-
-import getConversationId
+import generateEmoji
 
 class GetMessages:
     time = ""
