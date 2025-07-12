@@ -61,6 +61,9 @@ python3 app.py
     },
     "rooms": "room",                           //要发到的群名
     "sleepInterval": 5,                        //发送间隔
-    "post_num": 2                              //帖子数量，不足时将继续等一个时间间隔
+    "post_num": 2,                             //帖子数量，不足时将继续等一个时间间隔
+    "max_send_num": 10                         //每次发送的帖子数量
 }
 ```
+
+若要修改emoji，可在generateEmoji.py中修改，尚在考虑是否加入config.json
